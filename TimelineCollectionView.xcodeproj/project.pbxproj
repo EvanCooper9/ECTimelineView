@@ -19,7 +19,6 @@
 /* Begin PBXFileReference section */
 		C1F6B37621D52BD90038E63E /* TimelineCollectionView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TimelineCollectionView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1F6B37921D52BD90038E63E /* TimelineCollectionView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TimelineCollectionView.h; sourceTree = "<group>"; };
-		C1F6B37A21D52BD90038E63E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C1F6B38221D52BF50038E63E /* LoadDirection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadDirection.swift; sourceTree = "<group>"; };
 		C1F6B38321D52BF50038E63E /* TimelineCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineCollectionView.swift; sourceTree = "<group>"; };
 		C1F6B38421D52BF50038E63E /* TimelineCollectionViewConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineCollectionViewConfig.swift; sourceTree = "<group>"; };
@@ -64,7 +63,6 @@
 				C1F6B38321D52BF50038E63E /* TimelineCollectionView.swift */,
 				C1F6B38421D52BF50038E63E /* TimelineCollectionViewConfig.swift */,
 				C1F6B37921D52BD90038E63E /* TimelineCollectionView.h */,
-				C1F6B37A21D52BD90038E63E /* Info.plist */,
 			);
 			path = TimelineCollectionView;
 			sourceTree = "<group>";
