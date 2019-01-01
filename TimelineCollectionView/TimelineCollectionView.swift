@@ -82,7 +82,15 @@ final public class TimelineCollectionView<T, U>: UICollectionView, UICollectionV
     }
 
     required init?(coder aDecoder: NSCoder) {
-        fatalError("fatal error: init(coder:) has not been implemented")
+        super.init(coder: aDecoder)
+        self.config = TimelineCollectionViewConfig()
+        commonInit()
+    }
+
+    public func refresh(dataAt index: Int) {
+        data[index] = timelineDataSource?.timelineCollectionView(self, dataFor: index, asyncClosure: { asyncData in
+            self.data[index] = asyncData
+        })
     }
 
     // MARK: - Private functions
@@ -107,6 +115,7 @@ final public class TimelineCollectionView<T, U>: UICollectionView, UICollectionV
         let oldDataOffset = dataOffset!
         dataOffset = lowestVisibleIndex! - config.bufferedCells
 
+//        let spacingOffset = CGFloat(numberOfItems(inSection: 0) / 2) * config.cellSpacing * ((loadDirection == .positive) ? 1 : -1)
         let size = (config.scrollDirection == .horizontal) ? cellSize.width : cellSize.height
         let scrollAmount = (CGFloat(dataOffset - oldDataOffset) * size)
         let startOfContentOffset = (config.scrollDirection == .horizontal) ? contentOffset.x : contentOffset.y
@@ -131,9 +140,7 @@ final public class TimelineCollectionView<T, U>: UICollectionView, UICollectionV
         guard timelineDataSource != nil else { return }
         let pointToAddData = (loadDirection == .positive) ? data.keys.max()! + 1 : data.keys.min()! - 1
         let indexRange = (loadDirection == .positive) ? pointToAddData...pointToAddData + config.bufferedCells : pointToAddData - config.bufferedCells...pointToAddData
-        DispatchQueue.global(qos: .background).async {
-            self.fetchData(for: indexRange)
-        }
+        self.fetchData(for: indexRange)
     }
 
     private func requiresContentAdjustment() -> Bool {
@@ -181,7 +188,7 @@ final public class TimelineCollectionView<T, U>: UICollectionView, UICollectionV
     // MARK: - UICollectionViewDelegateFlowLayout
 
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 0
+        return config.cellSpacing
     }
 
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {

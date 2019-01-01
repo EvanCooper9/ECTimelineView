@@ -8,6 +8,6 @@
 
 import Foundation
 
-enum LoadDirection {
+internal enum LoadDirection {
     case positive, negative
 }

@@ -14,6 +14,7 @@ public struct TimelineCollectionViewConfig {
     public let visibleCells: Int
     public let scrollDirection: UICollectionView.ScrollDirection
     public let energySaving: Bool
+    public var cellSpacing: CGFloat
     public var pages: Int { return (bufferPages * 2) + 1 }
     public var bufferedCells: Int { return bufferPages * visibleCells }
 
@@ -21,11 +22,13 @@ public struct TimelineCollectionViewConfig {
                 bufferRegionPages: Int = 1,
                 visibleCells: Int = 5,
                 scrollDirection: UICollectionView.ScrollDirection = .vertical,
-                energySaving: Bool = false) {
+                energySaving: Bool = false,
+                cellSpacing: CGFloat = 0) {
         self.bufferPages = bufferPages
         self.bufferRegionPages = bufferRegionPages
         self.visibleCells = visibleCells
         self.scrollDirection = scrollDirection
         self.energySaving = energySaving
+        self.cellSpacing = cellSpacing
     }
 }
