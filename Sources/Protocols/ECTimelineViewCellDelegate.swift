@@ -8,7 +8,7 @@
 
 import UIKit
 
-public protocol TimelineCollectionViewCellDelegate: class {
+public protocol ECTimelineViewCellDelegate: class {
 
     /**
      Asks the delegate to configure the cell with the designated data

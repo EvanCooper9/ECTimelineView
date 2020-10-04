@@ -8,17 +8,17 @@
 
 import UIKit
 
-final public class TimelineCollectionView<T, U>: UICollectionView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout where T: Any, U: UICollectionViewCell {
+final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     // MARK: - Public properties
 
-    public weak var timelineDataSource: TimelineCollectionViewDataSource? {
+    public weak var timelineDataSource: ECTimelineViewDataSource? {
         didSet {
             fetchData(for: dataOffset...(config.pages * config.visibleCells) + dataOffset - 1)
         }
     }
 
-    public weak var timelineCellDelegate: TimelineCollectionViewCellDelegate? {
+    public weak var timelineCellDelegate: ECTimelineViewCellDelegate? {
         didSet {
             let indexPaths = visibleCells.compactMap { cell -> IndexPath? in
                 return indexPath(for: cell)
@@ -29,7 +29,7 @@ final public class TimelineCollectionView<T, U>: UICollectionView, UICollectionV
 
     // MARK: - Private properties
 
-    private var config: TimelineCollectionViewConfig!
+    private var config: ECTimelineViewConfig!
     private var data: [Int: T?] = [Int: T?]()
     private var onceOnly = true
     private var dataOffset: Int!
@@ -60,7 +60,7 @@ final public class TimelineCollectionView<T, U>: UICollectionView, UICollectionV
         }).sorted()
     }
 
-    private var fetchDataClosure: (TimelineCollectionView<T, U>, T?, Int) -> Void = { timelineCollectionView, data, index in
+    private var fetchDataClosure: (ECTimelineView<T, U>, T?, Int) -> Void = { timelineCollectionView, data, index in
         DispatchQueue.main.async {
             timelineCollectionView.data[index] = data
             guard let visibleIndicies = timelineCollectionView.visibleIndicies else { return }
@@ -73,7 +73,7 @@ final public class TimelineCollectionView<T, U>: UICollectionView, UICollectionV
 
     // MARK: - Public functions
 
-    public init(frame: CGRect, config: TimelineCollectionViewConfig) {
+    public init(frame: CGRect, config: ECTimelineViewConfig) {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = config.scrollDirection
         super.init(frame: frame, collectionViewLayout: layout)
@@ -83,7 +83,7 @@ final public class TimelineCollectionView<T, U>: UICollectionView, UICollectionV
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.config = TimelineCollectionViewConfig()
+        self.config = ECTimelineViewConfig()
         commonInit()
     }
 

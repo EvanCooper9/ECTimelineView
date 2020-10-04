@@ -1,3 +1,3 @@
 # ECTimelineView
 
-A description of this package.
+An infinitely scrolling view

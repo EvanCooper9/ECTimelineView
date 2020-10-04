@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol TimelineCollectionViewDataSource: class {
+public protocol ECTimelineViewDataSource: class {
 
     /**
      Asks for cell data that corresponds to the specified index
@@ -25,5 +25,5 @@ public protocol TimelineCollectionViewDataSource: class {
      - important:
      Data returned through asyncClosure will override any data previously returned
      */
-    func timelineCollectionView<T, U>(_ timelineCollectionView: TimelineCollectionView<T, U>, dataFor index: Int, asyncClosure: @escaping (_ data: T?) -> Void) -> T?
+    func timelineCollectionView<T, U>(_ timelineCollectionView: ECTimelineView<T, U>, dataFor index: Int, asyncClosure: @escaping (_ data: T?) -> Void) -> T?
 }

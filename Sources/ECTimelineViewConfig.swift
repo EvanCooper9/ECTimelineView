@@ -8,7 +8,7 @@
 
 import UIKit
 
-public struct TimelineCollectionViewConfig {
+public struct ECTimelineViewConfig {
     public let bufferPages: Int
     public let bufferRegionPages: Int
     public let visibleCells: Int
