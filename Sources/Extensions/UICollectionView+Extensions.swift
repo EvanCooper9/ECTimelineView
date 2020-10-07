@@ -1,11 +1,3 @@
-//
-//  UICollectionView+Extensions.swift
-//  TimelineCollectionView
-//
-//  Created by Evan Cooper on 2018-12-22.
-//  Copyright © 2018 Evan Cooper. All rights reserved.
-//
-
 import UIKit
 
 internal extension UICollectionView {

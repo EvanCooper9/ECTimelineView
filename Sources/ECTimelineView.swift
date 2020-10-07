@@ -1,11 +1,3 @@
-//
-//  TimelineCollectionView.swift
-//  TimelineCollectionView
-//
-//  Created by Evan Cooper on 2018-12-22.
-//  Copyright © 2018 Evan Cooper. All rights reserved.
-//
-
 import UIKit
 
 final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -20,133 +12,64 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
 
     public weak var timelineCellDelegate: ECTimelineViewCellDelegate? {
         didSet {
-            let indexPaths = visibleCells.compactMap { cell -> IndexPath? in
-                return indexPath(for: cell)
-            }
-            reloadItems(at: indexPaths)
+            reloadItems(at: visibleCells.compactMap { indexPath(for: $0) })
+        }
+    }
+    
+    // MARK: - Overrides
+    
+    public override var dataSource: UICollectionViewDataSource? {
+        didSet {
+            if !(dataSource is ECTimelineView) { preconditionFailure("Please do not set the dataSource property. Use timelineDataSource instead") }
+        }
+    }
+    
+    public override var delegate: UICollectionViewDelegate? {
+        didSet {
+            if !(delegate is ECTimelineView) { preconditionFailure("Please do not set the delegate property") }
         }
     }
 
     // MARK: - Private properties
 
-    private var config: ECTimelineViewConfig!
-    private var data: [Int: T?] = [Int: T?]()
+    private let config: ECTimelineViewConfig
     private var onceOnly = true
-    private var dataOffset: Int!
+    private var dataOffset = 0
+    
+    private let dataQueue = DispatchQueue(label: "com.evancooper.ectimelineview.data-queue")
+    
+    private var _data = [Int: T]()
+    private var data: [Int: T] {
+        get { dataQueue.sync { _data } }
+        set { dataQueue.sync { _data = newValue } }
+    }
+    
+    private var currentPosition: CGFloat {
+        let offset = config.horizontal ? contentOffset.x : contentOffset.y
+        return offset + (config.horizontal ? bounds.width : bounds.height) / 2
+    }
 
     private var loadDirection: LoadDirection {
-        let contentMiddle = (config.scrollDirection == .horizontal) ? contentSize.width / 2 : contentSize.height / 2
-        let middle = (config.scrollDirection == .horizontal) ? contentOffset.x : contentOffset.y
-        return (middle > contentMiddle) ? .positive : .negative
+        let contentMiddle = (config.horizontal ? contentSize.width : contentSize.height) / 2
+        return (currentPosition > contentMiddle) ? .positive : .negative
     }
 
     private var cellSize: CGSize {
-        let width = (config.scrollDirection == .horizontal) ? frame.width / CGFloat(config.visibleCells) : frame.width
-        let height = (config.scrollDirection == .horizontal) ? frame.height : frame.height / CGFloat(config.visibleCells)
+        let width = config.horizontal ? frame.width / CGFloat(config.visibleCells) : frame.width
+        let height = config.horizontal ? frame.height : frame.height / CGFloat(config.visibleCells)
         return CGSize(width: width, height: height)
     }
 
-    private var lowestVisibleIndex: Int? {
-        guard visibleCells.count > 0 else { return nil }
-        return visibleCells.map({ cell -> Int in
-            return indexPath(for: cell)!.row
-        }).sorted().first! + dataOffset
+    private var visibleIndicies: [Int] {
+        visibleCells
+            .compactMap { indexPath(for: $0)?.row }
+            .map { $0 + dataOffset }
     }
-
-    private var visibleIndicies: [Int]? {
-        guard visibleCells.count > 0 else { return nil }
-        return visibleCells.map({ cell -> Int in
-            return indexPath(for: cell)!.row + dataOffset
-        }).sorted()
-    }
-
-    private var fetchDataClosure: (ECTimelineView<T, U>, T?, Int) -> Void = { timelineCollectionView, data, index in
-        DispatchQueue.main.async {
-            timelineCollectionView.data[index] = data
-            guard let visibleIndicies = timelineCollectionView.visibleIndicies else { return }
-            if visibleIndicies.contains(index) {
-                let indexPath = IndexPath(row: index - timelineCollectionView.dataOffset, section: 0)
-                timelineCollectionView.reloadItems(at: [indexPath])
-            }
-        }
-    }
-
-    // MARK: - Public functions
-
-    public init(frame: CGRect, config: ECTimelineViewConfig) {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = config.scrollDirection
-        super.init(frame: frame, collectionViewLayout: layout)
-        self.config = config
-        commonInit()
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        self.config = ECTimelineViewConfig()
-        commonInit()
-    }
-
-    public func refresh(dataAt index: Int) {
-        data[index] = timelineDataSource?.timelineCollectionView(self, dataFor: index, asyncClosure: { asyncData in
-            self.data[index] = asyncData
-        })
-    }
-
-    // MARK: - Private functions
-
-    private func commonInit() {
-        showsVerticalScrollIndicator = false
-        showsHorizontalScrollIndicator = false
-        delegate = self
-        dataSource = self
-        register(cellType: U.self)
-        dataOffset = config.bufferPages * config.visibleCells
-    }
-
-    private func verifyDelegates() {
-        if timelineDataSource == nil { fatalError("timelineDataSource must not be nil") }
-        if timelineCellDelegate == nil { fatalError("timelineCellDelegate must not be nil") }
-    }
-
-    private func adjustContentOffset() {
-        guard lowestVisibleIndex != nil else { return }
-
-        let oldDataOffset = dataOffset!
-        dataOffset = lowestVisibleIndex! - config.bufferedCells
-
-//        let spacingOffset = CGFloat(numberOfItems(inSection: 0) / 2) * config.cellSpacing * ((loadDirection == .positive) ? 1 : -1)
-        let size = (config.scrollDirection == .horizontal) ? cellSize.width : cellSize.height
-        let scrollAmount = (CGFloat(dataOffset - oldDataOffset) * size)
-        let startOfContentOffset = (config.scrollDirection == .horizontal) ? contentOffset.x : contentOffset.y
-        let scrollTo = (loadDirection == .negative) ? startOfContentOffset - scrollAmount : startOfContentOffset - scrollAmount
-        let pointX = (config.scrollDirection == .horizontal) ? scrollTo : 0
-        let pointY = (config.scrollDirection == .horizontal) ? 0 : scrollTo
-
-        setContentOffset(CGPoint(x: pointX, y: pointY), animated: false)
-    }
-
-    private func fetchData(for range: ClosedRange<Int>) {
-        range.compactMap({ index -> Int? in
-            return (data.keys.contains(index)) ? nil : index
-        }).forEach { index in
-            data[index] = timelineDataSource?.timelineCollectionView(self, dataFor: index, asyncClosure: { data in
-                self.fetchDataClosure(self, data, index)
-            })
-        }
-    }
-
-    private func fetchData() {
-        guard timelineDataSource != nil else { return }
-        let pointToAddData = (loadDirection == .positive) ? data.keys.max()! + 1 : data.keys.min()! - 1
-        let indexRange = (loadDirection == .positive) ? pointToAddData...pointToAddData + config.bufferedCells : pointToAddData - config.bufferedCells...pointToAddData
-        self.fetchData(for: indexRange)
-    }
-
-    private func requiresContentAdjustment() -> Bool {
-        let size = (config.scrollDirection == .horizontal) ? frame.width : frame.height
-        let cSize = (config.scrollDirection == .horizontal) ? contentSize.width : contentSize.height
-        let start = (config.scrollDirection == .horizontal) ? contentOffset.x : contentOffset.y
+    
+    private var requiresContentAdjustment: Bool {
+        let size = config.horizontal ? frame.width : frame.height
+        let cSize = config.horizontal ? contentSize.width : contentSize.height
+        let start = config.horizontal ? contentOffset.x : contentOffset.y
         let end = start + size
 
         let bufferRegionTop = size * CGFloat(config.bufferRegionPages)
@@ -158,14 +81,89 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
         return scrolledToTop || scrolledToBottom
     }
 
+    // MARK: - Lifecycle
+
+    public init(frame: CGRect, config: ECTimelineViewConfig) {
+        self.config = config
+        super.init(frame: frame, collectionViewLayout: config.layout)
+        commonInit()
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        self.config = .init()
+        super.init(coder: aDecoder)
+        commonInit()
+    }
+    
+    private func commonInit() {
+        showsVerticalScrollIndicator = config.vertical
+        showsHorizontalScrollIndicator = config.horizontal
+        delegate = self
+        dataSource = self
+        register(cellType: U.self)
+        dataOffset = config.bufferPages * config.visibleCells
+    }
+    
+    // MARK: - Public Methods
+
+    public func refresh(dataAt index: Int) {
+        data[index] = timelineDataSource?
+            .timelineCollectionView(self, dataFor: index) { asyncData in
+                self.data[index] = asyncData
+            }
+    }
+
+    // MARK: - Private Methods
+
+    private func adjustContentOffset() {
+        guard let lowestVisibleIndex = visibleIndicies.min() else { return }
+
+        let oldDataOffset = dataOffset
+        dataOffset = lowestVisibleIndex - config.bufferedCells
+
+        let size = config.horizontal ? cellSize.width : cellSize.height
+        let scrollAmount = (CGFloat(dataOffset - oldDataOffset) * size)
+        let startOfContentOffset = config.horizontal ? contentOffset.x : contentOffset.y
+        let scrollTo = startOfContentOffset - scrollAmount
+        
+        let pointX = config.horizontal ? scrollTo : 0
+        let pointY = config.horizontal ? 0 : scrollTo
+        setContentOffset(.init(x: pointX, y: pointY), animated: false)
+    }
+    
+    private func fetchData() {
+        let pointToAddData = loadDirection.positive ? dataOffset + config.cellCount : dataOffset - config.bufferPages
+        let indexRange = loadDirection.positive ? pointToAddData...pointToAddData + config.bufferedCells : pointToAddData - config.bufferedCells...pointToAddData
+        self.fetchData(for: indexRange)
+    }
+
+    private func fetchData(for range: ClosedRange<Int>) {
+        range
+            .filter { config.refetchData || !data.keys.contains($0) }
+            .forEach { index in
+                self.dataQueue.sync {
+                    self._data[index] = timelineDataSource?
+                        .timelineCollectionView(self, dataFor: index) { [weak self] asyncData in
+                            guard let self = self else { return }
+                            self.dataQueue.sync { self._data[index] = asyncData }
+                            DispatchQueue.main.async {
+                                guard self.visibleIndicies.contains(index) else { return }
+                                let indexPath = IndexPath(row: index - self.dataOffset, section: 0)
+                                self.reloadItems(at: [indexPath])
+                            }
+                        }
+                }
+            }
+    }
+
     // MARK: - UICollectionViewDataSource
 
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
+        1
     }
 
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return config.visibleCells * config.pages
+        config.visibleCells * config.pages
     }
 
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -178,27 +176,25 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     // MARK: - UICollectionViewDelegate
 
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if onceOnly {
-            let middle: IndexPath = IndexPath(row: config.bufferedCells, section: 0)
-            scrollToItem(at: middle, at: .top, animated: false)
-            onceOnly = false
-        }
+        guard onceOnly else { return }
+        let middle: IndexPath = IndexPath(row: config.bufferedCells, section: 0)
+        scrollToItem(at: middle, at: .top, animated: false)
+        onceOnly = false
     }
 
     // MARK: - UICollectionViewDelegateFlowLayout
 
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return config.cellSpacing
+        config.cellSpacing
     }
 
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return cellSize
+        cellSize
     }
 
     // MARK: - UIScrollViewDelegate
 
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        if config.energySaving && !requiresContentAdjustment() { return }
         fetchData()
         adjustContentOffset()
         reloadData()
