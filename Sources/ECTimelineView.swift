@@ -38,7 +38,6 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     
     private let dataQueue = DispatchQueue(label: "com.evancooper.ectimelineview.data-queue")
     
-//    private var data = [Int: T]()
     private var _data = [Int: T]()
     private var data: [Int: T] {
         get { dataQueue.sync { _data } }
