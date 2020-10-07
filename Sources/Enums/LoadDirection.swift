@@ -1,13 +1,10 @@
-//
-//  LoadDirection.swift
-//  TimelineCollectionView
-//
-//  Created by Evan Cooper on 2018-12-24.
-//  Copyright © 2018 Evan Cooper. All rights reserved.
-//
-
 import Foundation
 
 internal enum LoadDirection {
     case positive, negative
+}
+
+extension LoadDirection {
+    var positive: Bool { self == .positive }
+    var negative: Bool { self == .negative }
 }

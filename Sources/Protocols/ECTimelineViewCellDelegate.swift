@@ -1,11 +1,3 @@
-//
-//  TimelineCollectionViewCellDelegate.swift
-//  TimelineCollectionView
-//
-//  Created by Evan Cooper on 2018-12-24.
-//  Copyright © 2018 Evan Cooper. All rights reserved.
-//
-
 import UIKit
 
 public protocol ECTimelineViewCellDelegate: class {
