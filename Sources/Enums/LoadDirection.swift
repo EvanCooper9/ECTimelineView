@@ -5,6 +5,6 @@ internal enum LoadDirection {
 }
 
 extension LoadDirection {
-    var positive: Bool { self == .positive }
-    var negative: Bool { self == .negative }
+    var isPositive: Bool { self == .positive }
+    var isNegative: Bool { self == .negative }
 }

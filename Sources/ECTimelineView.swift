@@ -6,13 +6,10 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
 
     public weak var timelineDataSource: ECTimelineViewDataSource? {
         didSet {
+            data.removeAll()
+            dataOffset = 0
+            onceOnly = true
             fetchData(for: dataOffset...(config.pages * config.visibleCells) + dataOffset - 1)
-        }
-    }
-
-    public weak var timelineCellDelegate: ECTimelineViewCellDelegate? {
-        didSet {
-            reloadItems(at: visibleCells.compactMap { indexPath(for: $0) })
         }
     }
     
@@ -20,13 +17,13 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     
     public override var dataSource: UICollectionViewDataSource? {
         didSet {
-            if !(dataSource is ECTimelineView) { preconditionFailure("Please do not set the dataSource property. Use timelineDataSource instead") }
+            if !(dataSource is Self) { preconditionFailure("Please do not set the dataSource property. Use timelineDataSource instead") }
         }
     }
     
     public override var delegate: UICollectionViewDelegate? {
         didSet {
-            if !(delegate is ECTimelineView) { preconditionFailure("Please do not set the delegate property") }
+            if !(delegate is Self) { preconditionFailure("Please do not set the delegate property") }
         }
     }
 
@@ -65,21 +62,6 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
             .compactMap { indexPath(for: $0)?.row }
             .map { $0 + dataOffset }
     }
-    
-    private var requiresContentAdjustment: Bool {
-        let size = config.horizontal ? frame.width : frame.height
-        let cSize = config.horizontal ? contentSize.width : contentSize.height
-        let start = config.horizontal ? contentOffset.x : contentOffset.y
-        let end = start + size
-
-        let bufferRegionTop = size * CGFloat(config.bufferRegionPages)
-        let bufferRegionBottom = cSize - bufferRegionTop
-
-        let scrolledToTop = start < bufferRegionTop
-        let scrolledToBottom = end > bufferRegionBottom
-
-        return scrolledToTop || scrolledToBottom
-    }
 
     // MARK: - Lifecycle
 
@@ -101,7 +83,7 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
         delegate = self
         dataSource = self
         register(cellType: U.self)
-        dataOffset = config.bufferPages * config.visibleCells
+        dataOffset = config.bufferScreens * config.visibleCells
     }
     
     // MARK: - Public Methods
@@ -119,7 +101,7 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
         guard let lowestVisibleIndex = visibleIndicies.min() else { return }
 
         let oldDataOffset = dataOffset
-        dataOffset = lowestVisibleIndex - config.bufferedCells
+        dataOffset = lowestVisibleIndex - config.bufferCells
 
         let size = config.horizontal ? cellSize.width : cellSize.height
         let scrollAmount = (CGFloat(dataOffset - oldDataOffset) * size)
@@ -132,8 +114,8 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     }
     
     private func fetchData() {
-        let pointToAddData = loadDirection.positive ? dataOffset + config.cellCount : dataOffset - config.bufferPages
-        let indexRange = loadDirection.positive ? pointToAddData...pointToAddData + config.bufferedCells : pointToAddData - config.bufferedCells...pointToAddData
+        let pointToAddData = loadDirection.isPositive ? dataOffset + config.cellCount : dataOffset - config.bufferScreens
+        let indexRange = loadDirection.isPositive ? pointToAddData...pointToAddData + config.bufferCells : pointToAddData - config.bufferCells...pointToAddData
         self.fetchData(for: indexRange)
     }
 
@@ -169,7 +151,7 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let adjustedIndex = indexPath.row + dataOffset
         let cell = dequeueReusableCell(withType: U.self, for: indexPath)
-        timelineCellDelegate?.configure(cell, withData: data[adjustedIndex])
+        timelineDataSource?.configure(cell, withData: data[adjustedIndex])
         return cell
     }
 
@@ -177,7 +159,7 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
 
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard onceOnly else { return }
-        let middle: IndexPath = IndexPath(row: config.bufferedCells, section: 0)
+        let middle: IndexPath = IndexPath(row: config.bufferCells, section: 0)
         scrollToItem(at: middle, at: .top, animated: false)
         onceOnly = false
     }
