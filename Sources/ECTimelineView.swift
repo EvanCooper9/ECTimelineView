@@ -9,7 +9,6 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
             data.removeAll()
             dataOffset = 0
             onceOnly = true
-//            fetchData()
             fetchData(for: dataOffset...(config.pages * config.visibleCells) + dataOffset - 1)
         }
     }
