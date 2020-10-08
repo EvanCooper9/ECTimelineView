@@ -116,7 +116,7 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
 
     public func refresh(dataAt index: Int) {
         data[index] = timelineDataSource?
-            .timelineCollectionView(self, dataFor: index) { asyncData in
+            .timelineView(self, dataFor: index) { asyncData in
                 self.data[index] = asyncData
             }
     }
@@ -151,7 +151,7 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
             .forEach { index in
                 self.dataQueue.sync {
                     self._data[index] = timelineDataSource?
-                        .timelineCollectionView(self, dataFor: index) { [weak self] asyncData in
+                        .timelineView(self, dataFor: index) { [weak self] asyncData in
                             guard let self = self else { return }
                             self.dataQueue.sync { self._data[index] = asyncData }
                             DispatchQueue.main.async {

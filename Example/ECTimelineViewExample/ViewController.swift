@@ -39,7 +39,7 @@ class ViewController: UIViewController {
 // MARK: - ECTimelineViewDataSource
 
 extension ViewController: ECTimelineViewDataSource {
-    func timelineCollectionView<T, U: UICollectionViewCell>(_ timelineCollectionView: ECTimelineView<T, U>, dataFor index: Int, asyncClosure: @escaping (T?) -> Void) -> T? {    
+    func timelineView<T, U: UICollectionViewCell>(_ timelineView: ECTimelineView<T, U>, dataFor index: Int, asyncClosure: @escaping (T?) -> Void) -> T? {
         DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 2) {
             asyncClosure(DataModel(index: index, value: "Async \(index)") as? T)
         }

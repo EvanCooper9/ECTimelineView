@@ -8,7 +8,7 @@ public protocol ECTimelineViewDataSource: AnyObject {
     ///   - index: the index of the data being stored in relation to all the other data
     ///   - asyncClosure: a closure to return the requested data in an asynchronous fashion
     /// - Important: Data returned through asyncClosure will override any data previously returned
-    func timelineCollectionView<T, U>(_ timelineCollectionView: ECTimelineView<T, U>, dataFor index: Int, asyncClosure: @escaping (_ data: T?) -> Void) -> T?
+    func timelineView<T, U>(_ timelineView: ECTimelineView<T, U>, dataFor index: Int, asyncClosure: @escaping (_ data: T?) -> Void) -> T?
     
     /// Configures the cell with the designated data
     /// - Parameters:
