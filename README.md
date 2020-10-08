@@ -12,13 +12,6 @@ An horizontal or vertical infinitely scrolling `UICollectionView` implementation
 ## Usage
 > Note: See inline documentation for more details
 
-### Configuration
-Use `ECTimelineViewConfig` at initialization time. You can configure things like:
-- Scroll direction
-- Cell count
-- Cell spacing
-- etc..
-
 ### Data Source
 Implement `ECTimelineViewDataSource`, and set the `timelineDataSource` property.
 

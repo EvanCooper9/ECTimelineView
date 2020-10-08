@@ -11,8 +11,7 @@ class ViewController: UIViewController {
     // MARK: - Outlets
     
     private lazy var timelineView: ECTimelineView<DataModel, UICollectionViewCell> = {
-        let config = ECTimelineViewConfig()
-        let timelineView = ECTimelineView<DataModel, UICollectionViewCell>(frame: .zero, config: config)
+        let timelineView = ECTimelineView<DataModel, UICollectionViewCell>()
         timelineView.timelineDataSource = self
         timelineView.translatesAutoresizingMaskIntoConstraints = false
         return timelineView
