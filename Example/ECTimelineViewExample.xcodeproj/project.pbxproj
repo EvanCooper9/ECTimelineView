@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7C886E05252E7A280069C885 /* ECTimelineView in Frameworks */ = {isa = PBXBuildFile; productRef = 7C886E04252E7A280069C885 /* ECTimelineView */; };
 		7CCBFF9E252AA4EA00EE9573 /* ECTimelineView in Frameworks */ = {isa = PBXBuildFile; productRef = 7CCBFF9D252AA4EA00EE9573 /* ECTimelineView */; };
 		7CCE2464252A8B4B007557FE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCE2463252A8B4B007557FE /* AppDelegate.swift */; };
 		7CCE2466252A8B4B007557FE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCE2465252A8B4B007557FE /* SceneDelegate.swift */; };
@@ -51,6 +50,7 @@
 		7CCE2481252A8B4C007557FE /* ECTimelineViewExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ECTimelineViewExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CCE2485252A8B4C007557FE /* ECTimelineViewExampleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ECTimelineViewExampleUITests.swift; sourceTree = "<group>"; };
 		7CCE2487252A8B4C007557FE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7CECCBDC252E899B00BF1511 /* ECTimelineView */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ECTimelineView; path = ..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,7 +58,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7C886E05252E7A280069C885 /* ECTimelineView in Frameworks */,
 				7CCBFF9E252AA4EA00EE9573 /* ECTimelineView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -90,6 +89,7 @@
 		7CCE2457252A8B4B007557FE = {
 			isa = PBXGroup;
 			children = (
+				7CECCBDC252E899B00BF1511 /* ECTimelineView */,
 				7CCE2462252A8B4B007557FE /* ECTimelineViewExample */,
 				7CCE2479252A8B4C007557FE /* ECTimelineViewExampleTests */,
 				7CCE2484252A8B4C007557FE /* ECTimelineViewExampleUITests */,
@@ -158,7 +158,6 @@
 			name = ECTimelineViewExample;
 			packageProductDependencies = (
 				7CCBFF9D252AA4EA00EE9573 /* ECTimelineView */,
-				7C886E04252E7A280069C885 /* ECTimelineView */,
 			);
 			productName = ECTimelineViewExample;
 			productReference = 7CCE2460252A8B4B007557FE /* ECTimelineViewExample.app */;
@@ -232,7 +231,6 @@
 			);
 			mainGroup = 7CCE2457252A8B4B007557FE;
 			packageReferences = (
-				7C886E03252E7A280069C885 /* XCRemoteSwiftPackageReference "ECTimelineView" */,
 			);
 			productRefGroup = 7CCE2461252A8B4B007557FE /* Products */;
 			projectDirPath = "";
@@ -613,23 +611,7 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		7C886E03252E7A280069C885 /* XCRemoteSwiftPackageReference "ECTimelineView" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/EvanCooper9/ECTimelineView";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
-		7C886E04252E7A280069C885 /* ECTimelineView */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 7C886E03252E7A280069C885 /* XCRemoteSwiftPackageReference "ECTimelineView" */;
-			productName = ECTimelineView;
-		};
 		7CCBFF9D252AA4EA00EE9573 /* ECTimelineView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ECTimelineView;

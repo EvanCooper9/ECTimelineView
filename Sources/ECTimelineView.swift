@@ -9,6 +9,7 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
             data.removeAll()
             dataOffset = 0
             onceOnly = true
+//            fetchData()
             fetchData(for: dataOffset...(config.pages * config.visibleCells) + dataOffset - 1)
         }
     }
@@ -114,8 +115,8 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     }
     
     private func fetchData() {
-        let pointToAddData = loadDirection.isPositive ? dataOffset + config.cellCount : dataOffset - config.bufferScreens
-        let indexRange = loadDirection.isPositive ? pointToAddData...pointToAddData + config.bufferCells : pointToAddData - config.bufferCells...pointToAddData
+        let pointToAddData = loadDirection.isPositive ? dataOffset + config.cellCount : dataOffset - config.bufferCells - 1
+        let indexRange = pointToAddData...pointToAddData + (loadDirection.isPositive ? config.cellCount : config.bufferCells)
         self.fetchData(for: indexRange)
     }
 

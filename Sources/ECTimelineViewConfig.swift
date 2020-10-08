@@ -19,8 +19,8 @@ public struct ECTimelineViewConfig {
     /// Spacing between each cell
     public var cellSpacing: CGFloat
 
-    public init(bufferPages: Int = 3, visibleCells: Int = 5, scrollDirection: ScrollDirection = .vertical, refetchData: Bool = false, cellSpacing: CGFloat = 0) {
-        self.bufferScreens = bufferPages
+    public init(bufferScreens: Int = 3, visibleCells: Int = 5, scrollDirection: ScrollDirection = .vertical, refetchData: Bool = false, cellSpacing: CGFloat = 0) {
+        self.bufferScreens = bufferScreens
         self.visibleCells = visibleCells
         self.scrollDirection = scrollDirection
         self.refetchData = refetchData

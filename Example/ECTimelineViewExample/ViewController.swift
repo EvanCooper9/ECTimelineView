@@ -14,7 +14,6 @@ class ViewController: UIViewController {
         let config = ECTimelineViewConfig()
         let timelineView = ECTimelineView<DataModel, UICollectionViewCell>(frame: .zero, config: config)
         timelineView.timelineDataSource = self
-        timelineView.timelineCellDelegate = self
         timelineView.translatesAutoresizingMaskIntoConstraints = false
         return timelineView
     }()
@@ -48,11 +47,7 @@ extension ViewController: ECTimelineViewDataSource {
         
         return DataModel(index: index, value: "\(index)") as? T
     }
-}
 
-// MARK: - ECTimelineViewCellDelegate
-
-extension ViewController: ECTimelineViewCellDelegate {
     func configure<T, U>(_ cell: U, withData data: T?) where U : UICollectionViewCell {
         guard let data = data as? DataModel else { return }
         cell.subviews.forEach { $0.removeFromSuperview() }
