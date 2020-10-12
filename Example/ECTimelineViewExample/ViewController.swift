@@ -8,7 +8,7 @@ struct DataModel {
 
 class ViewController: UIViewController {
 
-    // MARK: - Outlets
+    // MARK: - Private Properties
     
     private lazy var timelineView: ECTimelineView<DataModel, UICollectionViewCell> = {
         let timelineView = ECTimelineView<DataModel, UICollectionViewCell>()
@@ -16,8 +16,6 @@ class ViewController: UIViewController {
         timelineView.translatesAutoresizingMaskIntoConstraints = false
         return timelineView
     }()
-    
-    // MARK: - Private Properties
     
     private var data = [Int: DataModel]()
     

@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "ECUICollectionViewMultiDelegate",
+        "repositoryURL": "https://github.com/EvanCooper9/ECUICollectionViewMultiDelegate",
+        "state": {
+          "branch": "master",
+          "revision": "12fc074a5438b56fba802add2a2191cf6c8eb8ff",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

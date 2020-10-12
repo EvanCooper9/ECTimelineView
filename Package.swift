@@ -10,16 +10,16 @@ let package = Package(
             name: "ECTimelineView",
             targets: ["ECTimelineView"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/EvanCooper9/ECUICollectionViewMultiDelegate", .branch("master"))
+    ],
     targets: [
         .target(
             name: "ECTimelineView",
-            dependencies: [],
+            dependencies: [
+                .init(stringLiteral: "ECUICollectionViewMultiDelegate")
+            ],
             path: "Sources"
-        ),
-        .testTarget(
-            name: "ECTimelineViewTests",
-            dependencies: ["ECTimelineView"],
-            path: "Tests"
-        ),
+        )
     ]
 )

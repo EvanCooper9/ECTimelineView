@@ -1,17 +1,24 @@
+import ECUICollectionViewMultiDelegate
 import UIKit
 
-final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+public final class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     // MARK: - Public properties
     
-    /// Number of screens to prefetch data for
-    public var bufferScreens = 3
+    /// Number of screens on either side of the visible cells to prefetch data for
+    public var bufferScreens = 3 {
+        didSet { reloadData() }
+    }
     
     /// Number of cells visible on the screen
-    public var visibleCellCount = 5
+    public var visibleCellCount = 5 {
+        didSet { reloadData() }
+    }
     
     /// The direction dictates the axis fo scroll
-    public var scrollDirection = ScrollDirection.vertical
+    public var scrollDirection = ScrollDirection.vertical {
+        didSet { collectionViewLayout = layout }
+    }
     
     /// Whether or not to re-ask the data source for new data when loading a cell who's data had been previously fetched
     public var refetchData = false
@@ -24,32 +31,55 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
         didSet {
             data.removeAll()
             dataOffset = 0
-            onceOnly = true
+            displayedInitialCells = true
             fetchData(for: dataOffset...(pages * visibleCellCount) + dataOffset - 1)
         }
     }
     
+    public weak var timelineDelegate: UICollectionViewDelegate?
+    
     // MARK: - Overrides
     
+    /// Please do not set this property. Use `timelineDataSource` instead
     public override var dataSource: UICollectionViewDataSource? {
         didSet {
-            if !(dataSource is Self) { preconditionFailure("Please do not set the dataSource property. Use timelineDataSource instead") }
+            if !(dataSource is Self) { preconditionFailure("Please do not set the dataSource property. Use `timelineDataSource` instead") }
         }
     }
     
     public override var delegate: UICollectionViewDelegate? {
         didSet {
-            if !(delegate is Self) { preconditionFailure("Please do not set the delegate property") }
+            guard let delegate = delegate, !delegate.isEqual(multiDelegate) else { return }
+            multiDelegate.add(delegate)
+            self.delegate = multiDelegate
         }
     }
 
     // MARK: - Private properties
     
+    private let multiDelegate = ECUICollectionViewMultiDelegate()
+    
+    private var displayedInitialCells = false
     private var pages: Int { (bufferScreens * 2) + 1 }
     private var bufferCells: Int { bufferScreens * visibleCellCount }
     private var cellCount: Int { visibleCellCount + (bufferCells * 2) }
     private var horizontal: Bool { scrollDirection == .horizontal }
     private var vertical: Bool { scrollDirection == .vertical }
+
+    private let dataQueue = DispatchQueue(label: "com.evancooper.ectimelineview.data-queue")
+    private var data = [Int: T]()
+    private var dataOffset = 0
+    
+    private var cellSize: CGSize {
+        let width = horizontal ? frame.width / CGFloat(visibleCellCount) : frame.width
+        let height = horizontal ? frame.height : frame.height / CGFloat(visibleCellCount)
+        return CGSize(width: width, height: height)
+    }
+    
+    private var currentPosition: CGFloat {
+        let offset = horizontal ? contentOffset.x : contentOffset.y
+        return offset + (horizontal ? bounds.width : bounds.height) / 2
+    }
     
     private var layout: UICollectionViewFlowLayout {
         let layout = UICollectionViewFlowLayout()
@@ -57,31 +87,9 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
         return layout
     }
 
-    private var onceOnly = true
-    private var dataOffset = 0
-    
-    private let dataQueue = DispatchQueue(label: "com.evancooper.ectimelineview.data-queue")
-    
-    private var _data = [Int: T]()
-    private var data: [Int: T] {
-        get { dataQueue.sync { _data } }
-        set { dataQueue.sync { _data = newValue } }
-    }
-    
-    private var currentPosition: CGFloat {
-        let offset = horizontal ? contentOffset.x : contentOffset.y
-        return offset + (horizontal ? bounds.width : bounds.height) / 2
-    }
-
     private var loadDirection: LoadDirection {
         let contentMiddle = (horizontal ? contentSize.width : contentSize.height) / 2
         return (currentPosition > contentMiddle) ? .positive : .negative
-    }
-
-    private var cellSize: CGSize {
-        let width = horizontal ? frame.width / CGFloat(visibleCellCount) : frame.width
-        let height = horizontal ? frame.height : frame.height / CGFloat(visibleCellCount)
-        return CGSize(width: width, height: height)
     }
 
     private var visibleIndicies: [Int] {
@@ -113,6 +121,14 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     }
     
     // MARK: - Public Methods
+    
+    public func add(_ delegate: UICollectionViewDelegate) {
+        multiDelegate.add(delegate)
+    }
+    
+    public func remove(_ delegate: UICollectionViewDelegate) {
+        multiDelegate.remove(delegate)
+    }
 
     public func refresh(dataAt index: Int) {
         data[index] = timelineDataSource?
@@ -149,18 +165,17 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
         range
             .filter { refetchData || !data.keys.contains($0) }
             .forEach { index in
-                self.dataQueue.sync {
-                    self._data[index] = timelineDataSource?
-                        .timelineView(self, dataFor: index) { [weak self] asyncData in
-                            guard let self = self else { return }
-                            self.dataQueue.sync { self._data[index] = asyncData }
-                            DispatchQueue.main.async {
-                                guard self.visibleIndicies.contains(index) else { return }
-                                let indexPath = IndexPath(row: index - self.dataOffset, section: 0)
-                                self.reloadItems(at: [indexPath])
-                            }
+                let dataFromDataSource = timelineDataSource?
+                    .timelineView(self, dataFor: index) { [weak self] asyncData in
+                        guard let self = self else { return }
+                        self.dataQueue.sync { self.data[index] = asyncData }
+                        DispatchQueue.main.async {
+                            guard self.visibleIndicies.contains(index) else { return }
+                            let indexPath = IndexPath(row: index - self.dataOffset, section: 0)
+                            self.reloadItems(at: [indexPath])
                         }
-                }
+                    }
+                dataQueue.sync { data[index] = dataFromDataSource }
             }
     }
 
@@ -184,10 +199,9 @@ final public class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     // MARK: - UICollectionViewDelegate
 
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard onceOnly else { return }
-        let middle: IndexPath = IndexPath(row: bufferCells, section: 0)
-        scrollToItem(at: middle, at: .top, animated: false)
-        onceOnly = false
+        guard displayedInitialCells else { return }
+        displayedInitialCells.toggle()
+        scrollToItem(at: .init(row: bufferCells, section: 0), at: .top, animated: false)
     }
 
     // MARK: - UICollectionViewDelegateFlowLayout

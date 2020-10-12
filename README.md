@@ -19,7 +19,7 @@ Implement `ECTimelineViewDataSource`, and set the `timelineDataSource` property.
 // MARK: ECTimelineViewDataSource protocol
 
 // Asks for cell data that corresponds to the specified index
-func timelineCollectionView<T, U>(_ timelineCollectionView: ECTimelineView<T, U>, dataFor index: Int, asyncClosure: @escaping (_ data: T?) -> Void) -> T?
+func timelineView<T, U>(_ timelineView: ECTimelineView<T, U>, dataFor index: Int, asyncClosure: @escaping (_ data: T?) -> Void) -> T?
     
 // Configures the cell with the designated data
 func configure<T, U: UICollectionViewCell>(_ cell: U, withData data: T?)
