@@ -35,9 +35,7 @@ public final class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
             fetchData(for: dataOffset...(pages * visibleCellCount) + dataOffset - 1)
         }
     }
-    
-    public weak var timelineDelegate: UICollectionViewDelegate?
-    
+        
     // MARK: - Overrides
     
     /// Please do not set this property. Use `timelineDataSource` instead
