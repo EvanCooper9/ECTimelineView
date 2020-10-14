@@ -26,10 +26,10 @@ class ViewController: UIViewController {
         
         view.addSubview(timelineView)
         NSLayoutConstraint.activate([
-            view.leadingAnchor.constraint(equalTo: timelineView.leadingAnchor),
-            view.trailingAnchor.constraint(equalTo: timelineView.trailingAnchor),
-            view.topAnchor.constraint(equalTo: timelineView.topAnchor),
-            view.bottomAnchor.constraint(equalTo: timelineView.bottomAnchor)
+            view.safeAreaLayoutGuide.leadingAnchor.constraint(equalTo: timelineView.leadingAnchor),
+            view.safeAreaLayoutGuide.trailingAnchor.constraint(equalTo: timelineView.trailingAnchor),
+            view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: timelineView.topAnchor),
+            view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: timelineView.bottomAnchor)
         ])
     }
 }
@@ -37,9 +37,6 @@ class ViewController: UIViewController {
 // MARK: - ECTimelineViewDataSource
 
 extension ViewController: ECTimelineViewDataSource {
-    
-    var lowerBound: Int? { -10 }
-    var upperBound: Int? { 20 }
     
     func timelineView<T, U: UICollectionViewCell>(_ timelineView: ECTimelineView<T, U>, dataFor index: Int, asyncClosure: @escaping (T?) -> Void) -> T? {
         DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 2) {
