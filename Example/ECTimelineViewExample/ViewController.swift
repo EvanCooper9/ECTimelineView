@@ -8,17 +8,14 @@ struct DataModel {
 
 class ViewController: UIViewController {
 
-    // MARK: - Outlets
+    // MARK: - Private Properties
     
     private lazy var timelineView: ECTimelineView<DataModel, UICollectionViewCell> = {
-        let config = ECTimelineViewConfig()
-        let timelineView = ECTimelineView<DataModel, UICollectionViewCell>(frame: .zero, config: config)
+        let timelineView = ECTimelineView<DataModel, UICollectionViewCell>()
         timelineView.timelineDataSource = self
         timelineView.translatesAutoresizingMaskIntoConstraints = false
         return timelineView
     }()
-    
-    // MARK: - Private Properties
     
     private var data = [Int: DataModel]()
     
@@ -40,7 +37,7 @@ class ViewController: UIViewController {
 // MARK: - ECTimelineViewDataSource
 
 extension ViewController: ECTimelineViewDataSource {
-    func timelineCollectionView<T, U: UICollectionViewCell>(_ timelineCollectionView: ECTimelineView<T, U>, dataFor index: Int, asyncClosure: @escaping (T?) -> Void) -> T? {    
+    func timelineView<T, U: UICollectionViewCell>(_ timelineView: ECTimelineView<T, U>, dataFor index: Int, asyncClosure: @escaping (T?) -> Void) -> T? {
         DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 2) {
             asyncClosure(DataModel(index: index, value: "Async \(index)") as? T)
         }

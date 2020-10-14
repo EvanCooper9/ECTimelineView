@@ -5,24 +5,21 @@ import PackageDescription
 
 let package = Package(
     name: "ECTimelineView",
-    platforms: [
-        .iOS(.v12)
-    ],
     products: [
         .library(
             name: "ECTimelineView",
             targets: ["ECTimelineView"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/EvanCooper9/ECUICollectionViewMultiDelegate", from: "0.1.0")
+    ],
     targets: [
         .target(
             name: "ECTimelineView",
-            dependencies: [],
+            dependencies: [
+                .init(stringLiteral: "ECUICollectionViewMultiDelegate")
+            ],
             path: "Sources"
-        ),
-        .testTarget(
-            name: "ECTimelineViewTests",
-            dependencies: ["ECTimelineView"],
-            path: "Tests"
-        ),
+        )
     ]
 )
