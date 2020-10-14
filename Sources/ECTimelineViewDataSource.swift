@@ -2,6 +2,13 @@ import UIKit
 
 public protocol ECTimelineViewDataSource: AnyObject {
     
+    /// The lower bound (inclusive). The view will not scroll past this index or request data from the data source
+    var lowerBound: Int? { get }
+    
+    
+    /// The upper bound (exclusive). The view will not scroll past this index or request data from the data source
+    var upperBound: Int? { get }
+    
     /// Asks for cell data that corresponds to the specified index
     /// - Parameters:
     ///   - timelineCollectionView: the opject requesting the data
@@ -15,4 +22,9 @@ public protocol ECTimelineViewDataSource: AnyObject {
     ///   - cell: the cell to configure
     ///   - data: the data that should be used to configure the cell
     func configure<T, U: UICollectionViewCell>(_ cell: U, withData data: T?)
+}
+
+public extension ECTimelineViewDataSource {
+    var lowerBound: Int? { nil }
+    var upperBound: Int? { nil }
 }

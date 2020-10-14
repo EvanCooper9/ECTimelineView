@@ -20,30 +20,32 @@ public final class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
         didSet { collectionViewLayout = layout }
     }
     
+    /// Where to start the visible content, considering the buffer content that is loaded
+    public var startPosition: StartPosition = .middle
+    
     /// Whether or not to re-ask the data source for new data when loading a cell who's data had been previously fetched
     public var refetchData = false
     
     /// Spacing between each cell
     public var cellSpacing: CGFloat = 0
 
-    /// The data sources
+    /// The data source
     public weak var timelineDataSource: ECTimelineViewDataSource? {
         didSet {
             data.removeAll()
-            dataOffset = 0
-            displayedInitialCells = true
+            dataOffset = timelineDataSource?.lowerBound ?? 0
+            displayedInitialCells = false
             fetchData(for: dataOffset...(pages * visibleCellCount) + dataOffset - 1)
+            reloadData()
         }
     }
-    
-    public weak var timelineDelegate: UICollectionViewDelegate?
-    
+        
     // MARK: - Overrides
     
-    /// Please do not set this property. Use `timelineDataSource` instead
+    /// Do not set this property. Use `timelineDataSource` instead
     public override var dataSource: UICollectionViewDataSource? {
         didSet {
-            if !(dataSource is Self) { preconditionFailure("Please do not set the dataSource property. Use `timelineDataSource` instead") }
+            if !(dataSource is Self) { preconditionFailure("Do not set the dataSource property. Use `timelineDataSource` instead") }
         }
     }
     
@@ -58,7 +60,6 @@ public final class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     // MARK: - Private properties
     
     private let multiDelegate = ECUICollectionViewMultiDelegate()
-    
     private var displayedInitialCells = false
     private var pages: Int { (bufferScreens * 2) + 1 }
     private var bufferCells: Int { bufferScreens * visibleCellCount }
@@ -69,6 +70,11 @@ public final class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     private let dataQueue = DispatchQueue(label: "com.evancooper.ectimelineview.data-queue")
     private var data = [Int: T]()
     private var dataOffset = 0
+    
+    private var areBoundsValid: Bool {
+        guard let lowerBound = timelineDataSource?.lowerBound, let upperBound = timelineDataSource?.upperBound else { return true }
+        return (lowerBound..<upperBound).count >= cellCount
+    }
     
     private var cellSize: CGSize {
         let width = horizontal ? frame.width / CGFloat(visibleCellCount) : frame.width
@@ -145,6 +151,16 @@ public final class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
 
         let oldDataOffset = dataOffset
         dataOffset = lowestVisibleIndex - bufferCells
+        
+        if areBoundsValid {
+            if let lowerBound = timelineDataSource?.lowerBound, lowerBound > dataOffset {
+                dataOffset = lowerBound
+            }
+            
+            if let upperBound = timelineDataSource?.upperBound, upperBound < dataOffset + cellCount {
+                dataOffset = upperBound - cellCount
+            }
+        }
 
         let size = horizontal ? cellSize.width : cellSize.height
         let scrollAmount = (CGFloat(dataOffset - oldDataOffset) * size)
@@ -158,8 +174,21 @@ public final class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     
     private func fetchData() {
         let pointToAddData = loadDirection.isPositive ? dataOffset + cellCount : dataOffset - bufferCells - 1
-        let indexRange = pointToAddData...pointToAddData + (loadDirection.isPositive ? cellCount : bufferCells)
-        self.fetchData(for: indexRange)
+        
+        var min = pointToAddData
+        var max = pointToAddData + (loadDirection.isPositive ? cellCount : bufferCells)
+        
+        if areBoundsValid {
+            if let lowerBound = timelineDataSource?.lowerBound, lowerBound < min {
+                min = lowerBound
+            }
+            
+            if let upperBound = timelineDataSource?.upperBound, upperBound > max {
+                max = upperBound
+            }
+        }
+        
+        fetchData(for: min...max)
     }
 
     private func fetchData(for range: ClosedRange<Int>) {
@@ -200,9 +229,19 @@ public final class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
     // MARK: - UICollectionViewDelegate
 
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard displayedInitialCells else { return }
+        guard !displayedInitialCells else { return }
         displayedInitialCells.toggle()
-        scrollToItem(at: .init(row: bufferCells, section: 0), at: .top, animated: false)
+        let startPosition: Int = {
+            switch self.startPosition {
+            case .beginning:
+                return 0
+            case .middle:
+                return bufferCells
+            case .end:
+                return cellCount - visibleCellCount
+            }
+        }()
+        scrollToItem(at: .init(row: startPosition, section: 0), at: .top, animated: false)
     }
 
     // MARK: - UICollectionViewDelegateFlowLayout

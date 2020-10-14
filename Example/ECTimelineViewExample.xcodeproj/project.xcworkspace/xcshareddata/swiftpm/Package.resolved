@@ -5,9 +5,9 @@
         "package": "ECUICollectionViewMultiDelegate",
         "repositoryURL": "https://github.com/EvanCooper9/ECUICollectionViewMultiDelegate",
         "state": {
-          "branch": "master",
+          "branch": null,
           "revision": "12fc074a5438b56fba802add2a2191cf6c8eb8ff",
-          "version": null
+          "version": "0.1.0"
         }
       }
     ]
