@@ -116,6 +116,7 @@ public final class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
         showsHorizontalScrollIndicator = horizontal
         delegate = self
         dataSource = self
+        multiDelegate.reductionDelegate = self
         register(cellType: U.self)
         dataOffset = bufferScreens * visibleCellCount
     }
@@ -220,5 +221,12 @@ public final class ECTimelineView<T, U: UICollectionViewCell>: UICollectionView,
         fetchData()
         adjustContentOffset()
         reloadData()
+    }
+}
+
+
+extension ECTimelineView: ECReductionDelegate {
+    public func reduce<ReductionType>(_ first: ReductionType, _ second: ReductionType, selector: Selector) -> ReductionType {
+        second
     }
 }
