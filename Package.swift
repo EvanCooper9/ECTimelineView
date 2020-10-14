@@ -11,7 +11,7 @@ let package = Package(
             targets: ["ECTimelineView"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/EvanCooper9/ECUICollectionViewMultiDelegate", .branch("master"))
+        .package(url: "https://github.com/EvanCooper9/ECUICollectionViewMultiDelegate", from: "0.1.0")
     ],
     targets: [
         .target(

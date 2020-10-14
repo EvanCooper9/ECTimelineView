@@ -9,6 +9,9 @@ An horizontal or vertical infinitely scrolling `UICollectionView` implementation
 .package(url: "https://github.com/EvanCooper9/ECTimelineView", from: "1.0.0")
 ```
 
+### Dependencies
+- [ECUICollectionViewMultiDelegate](https://github.com/EvanCooper9/ECUICollectionViewMultiDelegate)
+
 ## Usage
 > Note: See inline documentation for more details
 
@@ -24,6 +27,3 @@ func timelineView<T, U>(_ timelineView: ECTimelineView<T, U>, dataFor index: Int
 // Configures the cell with the designated data
 func configure<T, U: UICollectionViewCell>(_ cell: U, withData data: T?)
 ```
-
-### Important
-Don't set the `dataSource` or `delegate` property. `ECTimelineView` is meant to be it's own data source and delegate.
